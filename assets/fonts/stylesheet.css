@@ -1,0 +1,12 @@
+@font-face {
+  font-family: 'Proxima Nova';
+  src: url('ProximaNovaBold.otf');
+  font-weight: bold;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'FuturisExtra';
+  src: url('FuturisTTBold.ttf');
+  font-weight: bold;
+  font-style: normal;
+}

@@ -1,0 +1,22 @@
+version: '3'
+services:
+  ficha-school-ui:
+    container_name: ficha-school-ui
+    build: .
+    network_mode: host
+    command: npm start
+    restart: always
+    logging:
+      options:
+        max-size: '10m'
+        max-file: '3'
+  ficha-school-ui-test:
+    container_name: ficha-school-ui-test
+    build: .
+    network_mode: host
+    command: npm run start-develop
+    restart: always
+    logging:
+      options:
+        max-size: '10m'
+        max-file: '3'

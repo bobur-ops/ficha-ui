@@ -1,0 +1,8 @@
+@function calculateVw($size) {
+  $vwSize: calc($size * 100 / 1440);
+  @return #{$vwSize}vw;
+}
+@function calculateVw768($size) {
+  $vwSize: calc($size * 100 / 768);
+  @return #{$vwSize}vw;
+}
