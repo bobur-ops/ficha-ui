@@ -1,62 +1,68 @@
 <template>
-  <div class="wrapper">
-    <Breadcrumbs :params="crumbs" />
-    <div class="login">
-      <div class="field">
-        <div class="login-input">
-          <Input v-model="name" placeholder="Имя" />
+  <client-only>
+    <div class="wrapper">
+      <Breadcrumbs :params="crumbs" />
+      <div class="login">
+        <div class="field">
+          <div class="login-input">
+            <Input v-model="name" placeholder="Имя" />
+          </div>
+          <div class="login-input">
+            <Input v-model="lastName" placeholder="Фамилия" />
+          </div>
         </div>
         <div class="login-input">
-          <Input v-model="lastName" placeholder="Фамилия" />
+          <Input
+            v-model="login"
+            v-debounce:300ms="checkLogin"
+            placeholder="логин"
+            :disabled="isLoading"
+          >
+            <div v-if="isLoading" class="lds-dual-ring"></div>
+          </Input>
         </div>
-      </div>
-      <div class="login-input">
-        <Input
-          v-model="login"
-          v-debounce:300ms="checkLogin"
-          placeholder="логин"
-          :disabled="isLoading"
-        >
-          <div v-if="isLoading" class="lds-dual-ring"></div>
-        </Input>
-      </div>
-      <div class="login-input">
-        <Input v-model="email" placeholder="e-mail" @input="isValidEmail" />
-      </div>
-      <div class="login-input">
-        <Input v-model="password" placeholder="пароль" />
-        <passwordMeter :password="password" @score="onScore" />
-      </div>
-      <div class="login-error">
-        <Text3 v-if="error" :color="errorTextColor"
-          >Что то пошло не так , попробуйте заново</Text3
-        >
-        <Text3 v-if="!validEmail" :color="errorTextColor"
-          >Адрес почты не действителен</Text3
-        >
-        <Text3 v-if="!isLoginUnique" :color="errorTextColor"
-          >Этот логин используется другим пользователем</Text3
-        >
-      </div>
-      <div class="login-button">
-        <Button :disabled="isBtnDisabled" @click="registerUser">
-          <Text3 :color="darkTextColor" is-upper>Зарегистрироваться</Text3>
-        </Button>
-      </div>
-      <div class="login-option">
-        <Text4 :color="grayTextColor">Уже есть аккаунт?</Text4>
-        <Text4 style="cursor: pointer" :color="redTextColor">
-          <NuxtLink tag="div" to="/login"> Войти </NuxtLink>
-        </Text4>
+        <div class="login-input">
+          <Input v-model="email" placeholder="e-mail" @input="isValidEmail" />
+        </div>
+        <div class="login-input">
+          <Input v-model="password" placeholder="пароль" />
+          <password
+            v-model="password"
+            :strength-meter-only="true"
+            @score="showScore"
+          />
+        </div>
+        <div class="login-error">
+          <Text3 v-if="error" :color="errorTextColor"
+            >Что то пошло не так , попробуйте заново</Text3
+          >
+          <Text3 v-if="!validEmail" :color="errorTextColor"
+            >Адрес почты не действителен</Text3
+          >
+          <Text3 v-if="!isLoginUnique" :color="errorTextColor"
+            >Этот логин используется другим пользователем</Text3
+          >
+        </div>
+        <div class="login-button">
+          <Button :disabled="isBtnDisabled" @click="registerUser">
+            <Text3 :color="darkTextColor" is-upper>Зарегистрироваться</Text3>
+          </Button>
+        </div>
+        <div class="login-option">
+          <Text4 :color="grayTextColor">Уже есть аккаунт?</Text4>
+          <Text4 style="cursor: pointer" :color="redTextColor">
+            <NuxtLink tag="div" to="/login"> Войти </NuxtLink>
+          </Text4>
+        </div>
       </div>
     </div>
-  </div>
+  </client-only>
 </template>
 <script lang="ts">
 import Vue from 'vue'
 import { mapActions, mapGetters } from 'vuex'
+import Password from 'vue-password-strength-meter'
 import vueDebounce from 'vue-debounce'
-import passwordMeter from 'vue-simple-password-meter'
 import { TEXT_COLORS } from '@/components/ui_components/Typography/constants'
 
 import Text3 from '@/components/ui_components/Typography/Text3.vue'
@@ -74,7 +80,7 @@ export default Vue.extend({
     Input,
     Button,
     Breadcrumbs,
-    passwordMeter,
+    Password,
   },
   data() {
     return {
@@ -91,7 +97,6 @@ export default Vue.extend({
       redTextColor: TEXT_COLORS.RED,
       errorTextColor: TEXT_COLORS.ERROR,
       crumbs: [{ name: 'register', path: '/register' }],
-
       passwordScore: 0,
     }
   },
@@ -101,8 +106,8 @@ export default Vue.extend({
       if (
         !this.isLoginUnique ||
         !this.validEmail ||
-        this.passwordScore === 0 ||
         !this.email ||
+        this.passwordScore === 0 ||
         !this.login
       ) {
         return true
@@ -118,6 +123,11 @@ export default Vue.extend({
   },
   methods: {
     ...mapActions('user', ['register', 'getUsers']),
+
+    showScore(score: number) {
+      this.passwordScore = score
+    },
+
     async checkLogin() {
       this.isLoginUnique = true
 
@@ -134,9 +144,6 @@ export default Vue.extend({
           this.isLoginUnique = false
         }
       })
-    },
-    onScore({ score }) {
-      this.passwordScore = score
     },
     isValidEmail() {
       const re =
